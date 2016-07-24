@@ -11,8 +11,7 @@ import time
 import zlib
 import argparse
 import urllib,urllib2
-
-from hashlib import md5
+import hashlib
 
 DEFAULT_MALNAMES = 'cryptowall,crypwall,bunitu,proxy,zeus,zbot,ramnit'
 
@@ -88,8 +87,8 @@ class TimeoutException(Exception):
     pass
 
 class FileInfo():
-    def __init__(md5,name=None):
-        self.md5 = md5
+    def __init__(filehash, name=None):
+        self.filehash = filehash
         self.name = name
         self.malname = None
         self.vendormalname = None
@@ -131,23 +130,34 @@ def make_req(host, url, mhash):
     return None
 
 def fetch_md5s(line):
-    pattern = '([0-9a-fA-F]{32})'
-    md5 = re.findall(pattern, line)
-    return md5
+    pattern = re.compile(r'\b[0-9a-fA-F]{32}\b')
+    fhash = re.findall(pattern, line)
+    return fhash
+
+def fetch_sha1(line):
+    pattern = re.compile(r'\b[0-9a-fA-F]{40}\b')
+    fhash = re.findall(pattern, line)
+    return fhash
+
+def fetch_sha256(line):
+    pattern = re.compile(r'\b[0-9a-f]{64}\b')
+    fhash = re.findall(pattern, line)
+    return fhash
 
 def get_hashes(fname):
     hashes = set()
     with open(fname, 'r') as f:
         for line in f.readlines():
             md5s = fetch_md5s(line)
-            for md5 in md5s: 
-                hashes.add(md5)
+            for h in md5s: 
+                hashes.add(h)
+            sha1s = fetch_sha1(line)
+            for h in sha1s: 
+                hashes.add(h)
+            sha256s = fetch_sha256(line)
+            for h in sha256s: 
+                hashes.add(h)
     return hashes
-
-def md5sum(data):
-    m = md5()
-    m.update(data)
-    return m.hexdigest()
 
 def calc_hashes(dir_name):
     dir_content = set(os.listdir(dir_name))
@@ -157,9 +167,9 @@ def calc_hashes(dir_name):
         if not os.path.isfile(fullname):
             continue
         data = open(fullname, 'rb').read()
-        md5 = md5sum(data)
-        print md5 + " : " + fname
-        hash_to_name[md5] = fname
+        filehash = hashlib.sha256(data).hexdigest()
+        print filehash + " : " + fname
+        hash_to_name[filehash] = fname
     return hash_to_name
 
 def get_between_patterns(data, pattern1, pattern2):
