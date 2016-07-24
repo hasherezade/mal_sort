@@ -13,7 +13,6 @@ import argparse
 import urllib,urllib2
 
 from hashlib import md5
-from colorterm import *
 
 DEFAULT_MALNAMES = 'cryptowall,crypwall,bunitu,proxy,zeus,zbot,ramnit'
 
@@ -29,6 +28,61 @@ content_type = "application/x-www-form-urlencoded"
 
 g_DisableColors = False
 
+#---
+#terminal colors:
+#
+GREY = '\033[90m'
+RED = '\033[91m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+BLUE = '\033[94m'
+PURPLE = '\033[95m'
+LIGHTBLUE = '\033[96m'
+BG_RED = '\033[6;30;41m'
+BG_GREY = '\033[6;37;40m'
+
+COLOR_END = '\033[0m'
+BOLD = "\033[1m"
+
+def color_signed_msg(color, sign, msg):
+    if not color or not sign:
+        print msg
+        return
+    if not is_linux():
+        print '[' + sign + '] ' + msg
+        return
+    print BOLD + color +'[' + sign + '] ' + COLOR_END + msg
+
+def color_msg(color,msg):
+    if not color or not is_linux():
+        print msg
+        return
+    print color + msg + COLOR_END
+
+def color_bold_msg(color, msg):
+    if not color:
+        print msg
+        return
+    print BOLD + color + msg + COLOR_END
+
+def info(msg):
+    color_signed_msg(BLUE, '*', msg)
+
+def good(msg):
+    color_signed_msg(GREEN, '+', msg)
+
+def warn(msg):
+    color_signed_msg(YELLOW, '!', msg)
+
+def err( msg):
+    color_signed_msg(RED, '-', msg)
+
+def is_linux():
+    from sys import platform as _platform
+    if "linux" in _platform :
+        return True
+    return False
+#---
 
 class TimeoutException(Exception):
     pass
