@@ -48,19 +48,19 @@ def color_signed_msg(color, sign, msg):
     if not color or not sign:
         print msg
         return
-    if not is_linux():
+    if not is_linux() or g_DisableColors is True:
         print '[' + sign + '] ' + msg
         return
     print BOLD + color +'[' + sign + '] ' + COLOR_END + msg
 
 def color_msg(color,msg):
-    if not color or not is_linux():
+    if not color or not is_linux() or g_DisableColors is True:
         print msg
         return
     print color + msg + COLOR_END
 
 def color_bold_msg(color, msg):
-    if not color:
+    if not color or not is_linux() or g_DisableColors is True:
         print msg
         return
     print BOLD + color + msg + COLOR_END
