@@ -163,7 +163,7 @@ def calc_hashes(dir_name):
     dir_content = set(os.listdir(dir_name))
     hash_to_name = dict()
     for fname in dir_content:
-        fullname = dir_name + "//" + fname
+        fullname = os.path.join(dir_name, fname)
         if not os.path.isfile(fullname):
             continue
         data = open(fullname, 'rb').read()
@@ -328,9 +328,12 @@ def main():
 
     hash_to_name = None
     if args.dir is not None:
-        hash_to_name = calc_hashes(args.dir)
+        dirstr = os.path.expanduser(args.dir)
+        dirstr = os.path.expandvars(dirstr)
+
+        hash_to_name = calc_hashes(dirstr)
         hashes = hash_to_name.keys()
-        input_name = args.dir
+        input_name = dirstr + ".txt"
 
     malnames = args.names.split(',')
     if args.keywords :
