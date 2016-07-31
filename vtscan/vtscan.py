@@ -300,6 +300,7 @@ def make_outfile_name(filename, prefix):
 def main():
     parser = argparse.ArgumentParser(description="VirusTotal checker "+ __VERSION__)
     parser.add_argument('--hashes', dest="hashes", default=None, help="Input file with list of hashes (alternative to dir)")
+    parser.add_argument('--whitelist', dest="whitelist", default=None, help="Input file with list of whitelisted hashes")
     parser.add_argument('--dir', dest="dir", default=None, help="Input directory with files to scan")
     parser.add_argument('--names', dest="names", default=DEFAULT_MALNAMES, help="Searched malware names, ie. " + DEFAULT_MALNAMES)
     parser.add_argument('--keywords', dest="keywords", default=None, help="Other keywords searched in the report")
@@ -334,6 +335,22 @@ def main():
         hash_to_name = calc_hashes(dirstr)
         hashes = hash_to_name.keys()
         input_name = dirstr + ".txt"
+
+    if len(hashes):
+        good("{} hashes loaded.".format(len(hashes)))
+    else:
+        print "[ERROR] No hashes found in given file!"
+        return (-1)
+
+    if args.whitelist:
+        whitelist = get_hashes(args.whitelist)
+
+    if args.whitelist:
+        hashes = hashes - whitelist
+        if len(hashes):
+            good("{} hashes remain after whitelist elimination.".format(len(hashes)))
+        else:
+            err("No hashes remaining after whitelist elimination.")
 
     malnames = args.names.split(',')
     if args.keywords :
