@@ -284,7 +284,7 @@ def write_to_file(f, item_info):
     f.write("%s\n" % item_info)
 
 def write_list_to_file(filename, input_list):
-    with open(filename, 'w') as f:
+    with open(filename, 'a+') as f:
         for item in input_list:
             f.write("%s\n" % item)
     print "Saved: " + filename
@@ -351,6 +351,7 @@ def main():
             good("{} hashes remain after whitelist elimination.".format(len(hashes)))
         else:
             err("No hashes remaining after whitelist elimination.")
+            return 0
 
     malnames = args.names.split(',')
     if args.keywords :
