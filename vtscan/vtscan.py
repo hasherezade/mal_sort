@@ -280,15 +280,6 @@ def vt_check(mhash, keywords, vendor, other_keywords=None):
         pass
     return False
 
-def write_to_file(f, item_info):
-    f.write("%s\n" % item_info)
-
-def write_list_to_file(filename, input_list):
-    with open(filename, 'a+') as f:
-        for item in input_list:
-            f.write("%s\n" % item)
-    print "Saved: " + filename
-
 def make_outfile_name(filename, prefix):
     basename = os.path.basename(filename)
     dirname = os.path.dirname(filename)
@@ -359,27 +350,32 @@ def main():
     else:
         keywords = None
 
+    found_file = open(make_outfile_name( input_name, 'FOUND_'), 'a+')
+    nfound_file = open(make_outfile_name( input_name, 'NOTFOUND_'), 'a+')
+
     for mhash in hashes:
         found = vt_check(mhash, malnames, args.vendor, keywords)
         if found:
+            found_list.append(mhash)
             if hash_to_name is not None:
                 name = hash_to_name[mhash]
                 if name is not None:
                     print name
                     mhash = mhash + " : " + name
-            found_list.append(mhash + " : " + found)
+            found_file.write("%s : %s\n" % (mhash, found))
+            found_file.flush()
         else:
             not_found_list.append(mhash)
+            nfound_file.write("%s\n" % mhash).flush()
+            nfound_file.flush()
         time.sleep(args.sleeptime)
     print "----"
     print "Summary:"
-    found_name = make_outfile_name( input_name, 'FOUND_')
-    good("Found: " + str(len(found_list)))
-    write_list_to_file(found_name, found_list)
 
-    nfound_name = make_outfile_name(input_name, 'NOTFOUND_')
+    good("Found: " + str(len(found_list)))
     err("Not Found: " + str(len(not_found_list)))
-    write_list_to_file(nfound_name, not_found_list)
+    found_file.close()
+    nfound_file.close()
     print "----"
     return 1
 
