@@ -86,14 +86,6 @@ def is_linux():
 class TimeoutException(Exception):
     pass
 
-class FileInfo():
-    def __init__(filehash, name=None):
-        self.filehash = filehash
-        self.name = name
-        self.malname = None
-        self.vendormalname = None
-        self.keywords = set()
-
 def decompress_data(data):
     data=zlib.decompress(data, 16+zlib.MAX_WBITS)
     return data
@@ -288,6 +280,15 @@ def make_outfile_name(filename, prefix):
     out_name = os.path.join(dirname, basename)
     return out_name
 
+def make_outfile(out_file_name):
+    out_file = open(out_file_name, 'a+')
+    if out_file:
+        info("File: " + out_file_name)
+    else:
+        err("Cannot open file: " + out_file_name)
+        return None
+    return out_file
+
 def main():
     parser = argparse.ArgumentParser(description="VirusTotal checker "+ __VERSION__)
     parser.add_argument('--hashes', dest="hashes", default=None, help="Input file with list of hashes (alternative to dir)")
@@ -350,8 +351,16 @@ def main():
     else:
         keywords = None
 
-    found_file = open(make_outfile_name( input_name, 'FOUND_'), 'a+')
-    nfound_file = open(make_outfile_name( input_name, 'NOTFOUND_'), 'a+')
+    print "Results will be appended to files:"
+    found_file_name = make_outfile_name( input_name, 'FOUND_')
+    found_file = make_outfile(found_file_name)
+    if found_file is None:
+        return (-1)
+
+    nfound_file_name = make_outfile_name( input_name, 'NOTFOUND_')
+    nfound_file  = make_outfile(nfound_file_name)
+    if found_file is None:
+        return (-1)
 
     for mhash in hashes:
         found = vt_check(mhash, malnames, args.vendor, keywords)
@@ -373,7 +382,9 @@ def main():
     print "Summary:"
 
     good("Found: " + str(len(found_list)))
+    info("File: " + found_file_name)
     err("Not Found: " + str(len(not_found_list)))
+    info("File: " + nfound_file_name)
     found_file.close()
     nfound_file.close()
     print "----"
