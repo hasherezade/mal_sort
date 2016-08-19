@@ -375,7 +375,7 @@ def main():
             found_file.flush()
         else:
             not_found_list.append(mhash)
-            nfound_file.write("%s\n" % mhash).flush()
+            nfound_file.write("%s\n" % mhash)
             nfound_file.flush()
         time.sleep(args.sleeptime)
     print "----"
